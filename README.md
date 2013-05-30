@@ -1,7 +1,8 @@
 Heroku buildpack: Node.js
 =========================
 
-This is a [Heroku buildpack](http://devcenter.heroku.com/articles/buildpacks) for Node.js apps.
+This is a [Heroku buildpack](http://devcenter.heroku.com/articles/buildpacks) for Node.js apps 
+that use Tesseract(http://code.google.com/p/tesseract-ocr/).
 It uses [NPM](http://npmjs.org/) and [SCons](http://www.scons.org/).
 
 Usage
