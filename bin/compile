@@ -197,9 +197,9 @@ cmake_file="cmake-${cmake_version}.tar.gz"
 cmake_tar_dir="cmake-${cmake_version}"
 
 opencv_version="2.4.5"
-opencv_dir="OpenCV-${opencv_version}"
+opencv_dir="opencv-${opencv_version}"
 opencv_file="${opencv_dir}.tar.gz"
-opencv_url="https://s3.amazonaws.com/shantanu.deck/${opencv_dir}.tar.bz2"
+opencv_url="https://s3.amazonaws.com/shantanu.deck/${opencv_dir}.tar.gz"
 
 cache_target=${cache}/${cmake_file}
 build_target=${build}/.heroku
