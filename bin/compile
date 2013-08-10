@@ -178,7 +178,7 @@ export CPPPATH="$INCLUDE_PATH"
 #install OpenCV
 
 # from https://github.com/freeformz/heroku-buildpack-io/blob/master/bin/compile
-
+:<< OpenCVInstallBlock
 set -e
 
 indent() {
@@ -242,7 +242,12 @@ if [ ! -f ${cache_target} ]; then
   cd ${opencv_dir}
   mkdir build
   cd build
+  # To turn building specific modules off use -
+  #-D BUILD_opencv_{modulename}=OFF
+  #OpenCV modules - 
+  #flann highgui features2d calib3d ml video objdetect contrib nonfree gpu legacy photo python stitching ts videostab
   cmake -DCMAKE_INSTALL_PREFIX=${target} -DCMAKE_FIND_ROOT_PATH=${target} -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_SHARED_LIBS=OFF -DCMAKE_SHARED_LINKER_FLAGS="-fPIC" .. | indent
+
   make install | indent
   cd ..
 
@@ -254,6 +259,8 @@ mkdir -p ${build_target}
 tar xzf ${cache_target} -C ${build_target}
 
 #Done OpenCV
+#Block Comment End
+OpenCVInstallBlock
 
 # install dependencies with npm
 echo "-----> Installing dependencies with npm"
@@ -265,6 +272,34 @@ echo "-----> Building runtime environment"
 mkdir -p $BUILD_DIR/.profile.d
 echo "export PATH=\"\$HOME/bin:\$HOME/node_modules/.bin:\$PATH\"" > $BUILD_DIR/.profile.d/nodejs.sh
 
+echo "--> Provisioning Tesseract"
+BUILD_DIR=$1
+TESSERACT_OCR_VERSION=3.02.02
+TESSERACT_OCR_DATA_VERSION=3.02
+
+TESSERACT_OCR_TGZ=tesseract-ocr-$TESSERACT_OCR_VERSION.tar.gz
+TESSERACT_OCR_REMOTE=https://s3.amazonaws.com/tesseract-ocr/heroku/$TESSERACT_OCR_TGZ
+INSTALL_DIR=$BUILD_DIR/vendor/tesseract-ocr/
+INSTALL_DIR_TRAINING_DATA=$BUILD_DIR/vendor/
+TESSERACT_OCR_DIR=${HOME}/vendor/tesseract-ocr
+ENVSCRIPT=$BUILD_DIR/.profile.d/tesseract-ocr.sh
+
+echo "Getting Tesseract-ocr Binaries from $TESSERACT_OCR_REMOTE..."
+mkdir -p $INSTALL_DIR
+curl $TESSERACT_OCR_REMOTE -o - | tar -xz -C $INSTALL_DIR -f -
+
+echo 'Getting tesseract-ocr training data'
+echo 'English training data'
+curl https://tesseract-ocr.googlecode.com/files/tesseract-ocr-$TESSERACT_OCR_DATA_VERSION.eng.tar.gz \
+  -o - | tar -xz -C $INSTALL_DIR_TRAINING_DATA -f -
+
+echo "Building runtime environment for tesseract-ocr"
+mkdir -p $BUILD_DIR/.profile.d
+echo "export PATH=\"$TESSERACT_OCR_DIR/bin:\$PATH\"" > $ENVSCRIPT
+echo "export LD_LIBRARY_PATH=\"$TESSERACT_OCR_DIR/lib:\$LD_LIBRARY_PATH\"" >> $ENVSCRIPT
+echo "export TESSDATA_PREFIX=\"$TESSERACT_OCR_DIR/\"" >> $ENVSCRIPT
+
+echo "--> Provisioning OpenCV"
 
 
 # ### Fin.
